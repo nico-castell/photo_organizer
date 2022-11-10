@@ -80,10 +80,8 @@ pub fn run(config: Config) -> Result<(), &'static str> {
         Err(_) => return Err("Could not read source directory structure.")
     };
 
-    let organized_dir_tree = dir_tree.organize(&source, &destination);
-
-    if let Err(_) = organized_dir_tree.construct() {
-        return Err("Error creating destination directory structure.");
+    if let Err(_) = dir_tree.organize(&source, &destination) {
+        return Err("Could not copy to the destination directory.");
     }
 
     Ok(())

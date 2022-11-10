@@ -1,18 +1,11 @@
 use std::{
-    borrow::BorrowMut,
     cell::RefCell,
-    error::Error,
-    ffi::OsStr,
     fs, io,
     path::{Path, PathBuf},
-    rc::{Rc, Weak},
+    rc::Rc,
 };
 
 pub struct SourceTree {
-    list: Rc<RefCell<Vec<PathBuf>>>,
-}
-
-pub struct DestinationTree {
     list: Rc<RefCell<Vec<PathBuf>>>,
 }
 
@@ -53,7 +46,7 @@ impl SourceTree {
         Ok(SourceTree { list })
     }
 
-    pub fn organize(self, source: &str, destination: &str) -> DestinationTree {
+    pub fn organize(self, source: &str, destination: &str) -> Result<(), &'static str> {
         let mut list = RefCell::borrow_mut(&self.list);
 
         for mut entry in list.iter_mut() {
@@ -71,26 +64,25 @@ impl SourceTree {
                 println!("{}", s_entry);
             }
 
-            let extension = match entry.extension() {
+            let extension = match &entry.extension() {
                 Some(extension) => extension.to_str().unwrap(),
                 None => "",
             };
             s_entry = s_entry.replace(&extension, &extension.to_lowercase());
 
-            entry.clear();
-            entry.push(&s_entry);
+            let from = entry.as_path().clone();
+
+            let to = PathBuf::from(&s_entry);
+
+            if extension == "" {
+                fs::create_dir_all(to.as_path());
+            }
+            else
+            {
+                fs::copy(from, to.as_path());
+            }
         }
 
-        drop(list);
-
-        DestinationTree {
-            list: self.list
-        }
-    }
-}
-
-impl DestinationTree {
-    pub fn construct(&self) -> io::Result<()> {
         Ok(())
     }
 }
