@@ -54,12 +54,14 @@ impl Config {
     pub fn print_config() {
         eprint!(
             "\
-\x1B[01mphoto_organizer SOURCE DESTINATION [OPTIONS]\x1B[00m\n
+\x1B[01mphoto_organizer SOURCE DESTINATION [OPTIONS]\x1B[00m
+Version: {}\n
 Options:
    -s | --skip     ) Skips all files that are already present at DESTINATION.
                      This is the default.\n
-   -o | --override ) Replaces files already present at DESTINATION with the version from SOURCE.
-"
+   -o | --override ) Replaces files already present at DESTINATION with the version from SOURCE.\n
+   -h | --help     ) Prints this help information.
+", env!("CARGO_PKG_VERSION")
         );
     }
 }
