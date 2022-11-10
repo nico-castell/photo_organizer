@@ -49,7 +49,8 @@ impl Config {
     /// # Example
     ///
     /// ```
-    /// print_config()
+    /// # use iphone_organizer::*;
+    /// Config::print_config()
     /// ```
     pub fn print_config() {
         eprint!(
@@ -75,7 +76,7 @@ Options:
 ///
 /// # Examples
 ///
-/// ```
+/// ```ignore
 /// # use iphone_organizer::*;
 /// # let args = vec![
 /// #     String::from("program_name"),
