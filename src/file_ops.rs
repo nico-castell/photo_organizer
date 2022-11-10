@@ -24,7 +24,7 @@ impl FileList {
     /// # Errors
     ///
     /// this constructor can fail if it fails to read the source directory structure.
-    pub fn build(source: &PathBuf) -> BuildResult<FileList> {
+    pub fn build(source: &PathBuf) -> Result<FileList, Box<dyn Error>> {
         fn build_list(list: Rc<RefCell<Vec<PathBuf>>>) -> io::Result<()> {
             let dir = list
                 .borrow()
@@ -53,7 +53,7 @@ impl FileList {
         let list = Rc::new(RefCell::new(vec![PathBuf::from(source)]));
 
         if let Err(_) = build_list(Rc::clone(&list)) {
-            return Err(StructureError);
+            return Err(StructureError.into());
         }
 
         Ok(FileList { list })
@@ -110,8 +110,6 @@ impl FileList {
         Ok(())
     }
 }
-
-type BuildResult<T> = std::result::Result<T, StructureError>;
 
 #[derive(Debug, Clone)]
 pub struct StructureError;
