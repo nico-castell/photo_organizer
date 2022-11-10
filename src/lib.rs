@@ -39,7 +39,6 @@ impl Config {
 ///
 /// This function will return an error if:
 /// - The source path does not exist.
-/// - The destination path cannot be written to.
 ///
 /// # Examples
 ///
@@ -62,18 +61,9 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
     let (source, destination) = (config.source, config.destination);
 
     let source_path = PathBuf::from(&source);
-    let destination_path = PathBuf::from(&destination);
-
     if !source_path.is_dir() {
         return Err(RunError {
             message: "Source directory does not exist.",
-        }
-        .into());
-    }
-
-    if !destination_path.is_dir() {
-        return Err(RunError {
-            message: "Destination directory does not exist.",
         }
         .into());
     }
