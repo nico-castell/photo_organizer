@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{error::Error, fmt, path::PathBuf, result};
 
 mod file_ops;
 
@@ -13,7 +13,7 @@ impl Config {
     /// # Errors
     ///
     /// The function can fail `args` does not contain source and destination paths.
-    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
+    pub fn build(mut args: impl Iterator<Item = String>) -> result::Result<Config, &'static str> {
         args.next();
 
         let source = String::from(match args.next() {
@@ -58,34 +58,52 @@ impl Config {
 ///     panic!("Application error: {error}");
 /// }
 /// ```
-pub fn run(config: Config) -> Result<(), &'static str> {
-    // TODO: Implement proper error propagation.
+pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
     let (source, destination) = (config.source, config.destination);
 
-    let source_path = Path::new(&source);
-    let destination_path = Path::new(&destination);
+    let source_path = PathBuf::from(&source);
+    let destination_path = PathBuf::from(&destination);
 
     if !source_path.is_dir() {
-        return Err("Source directory does not exist.");
+        return Err(RunError {
+            message: "Source directory does not exist.",
+        }
+        .into());
     }
 
     if !destination_path.is_dir() {
-        return Err("Destination directory does not exist.");
+        return Err(RunError {
+            message: "Destination directory does not exist.",
+        }
+        .into());
     }
 
-    use file_ops::SourceTree;
+    use file_ops::FileList;
 
-    let dir_tree = match SourceTree::build(&source_path) {
-        Ok(tree) => tree,
-        Err(_) => return Err("Could not read source directory structure.")
+    let file_list = match FileList::build(&source_path) {
+        Ok(list) => list,
+        Err(error) => return Err(error.into()),
     };
 
-    if let Err(_) = dir_tree.organize(&source, &destination) {
-        return Err("Could not copy to the destination directory.");
+    if let Err(error) = file_list.organize(&source, &destination) {
+        return Err(error.into());
     }
 
     Ok(())
 }
+
+#[derive(Debug, Clone)]
+struct RunError {
+    message: &'static str,
+}
+
+impl fmt::Display for RunError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl Error for RunError {}
 
 #[cfg(test)]
 mod tests {

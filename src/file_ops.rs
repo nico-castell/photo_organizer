@@ -1,9 +1,4 @@
-use std::{
-    cell::RefCell,
-    fs, io,
-    path::{Path, PathBuf},
-    rc::Rc,
-};
+use std::{cell::RefCell, error::Error, fmt, fs, io, path::PathBuf, rc::Rc};
 
 /// A struct that contains the file list as needed by the file_ops module.
 ///
@@ -29,8 +24,8 @@ impl FileList {
     /// # Errors
     ///
     /// this constructor can fail if it fails to read the source directory structure.
-    pub fn build(source: &PathBuf) -> Result<FileList, &'static str> {
-        fn build_list(mut list: Rc<RefCell<Vec<PathBuf>>>) -> io::Result<()> {
+    pub fn build(source: &PathBuf) -> BuildResult<FileList> {
+        fn build_list(list: Rc<RefCell<Vec<PathBuf>>>) -> io::Result<()> {
             let dir = list
                 .borrow()
                 .get(list.borrow().len() - 1)
@@ -42,12 +37,12 @@ impl FileList {
                     let path = entry.path();
 
                     unsafe {
-                        let mut list = list.as_ptr();
+                        let list = list.as_ptr();
                         (*list).push(PathBuf::from(&path));
                     }
 
                     if path.is_dir() {
-                        build_list(Rc::clone(&list));
+                        build_list(Rc::clone(&list))?;
                     }
                 }
             }
@@ -57,9 +52,8 @@ impl FileList {
 
         let list = Rc::new(RefCell::new(vec![PathBuf::from(source)]));
 
-        // TODO: Implement proper error propagation.
         if let Err(_) = build_list(Rc::clone(&list)) {
-            return Err("Could not read source directory structure.");
+            return Err(StructureError);
         }
 
         Ok(FileList { list })
@@ -69,11 +63,13 @@ impl FileList {
     ///
     /// # Errors
     ///
-    /// This function may result in an error in case the files don't contain valid UTF-8 data.
-    pub fn organize(self, source: &str, destination: &str) -> Result<(), &'static str> {
+    /// This function may result in an error in case:
+    /// - The files don't contain valid UTF-8 data.
+    /// - You don't have permissions to edit the destination.
+    pub fn organize(self, source: &str, destination: &str) -> Result<(), Box<dyn Error>> {
         let mut list = RefCell::borrow_mut(&self.list);
 
-        for mut entry in list.iter_mut() {
+        for entry in list.iter_mut() {
             let mut s_entry = entry.to_str().unwrap().replace(&source, &destination);
 
             let s_entry_chars = s_entry.chars().count();
@@ -99,14 +95,25 @@ impl FileList {
             let to = PathBuf::from(&s_entry);
 
             if extension == "" {
-                fs::create_dir_all(to.as_path());
-            }
-            else
-            {
-                fs::copy(from, to.as_path());
+                fs::create_dir_all(to.as_path())?;
+            } else {
+                fs::copy(from, to.as_path())?;
             }
         }
 
         Ok(())
     }
 }
+
+type BuildResult<T> = std::result::Result<T, StructureError>;
+
+#[derive(Debug, Clone)]
+pub struct StructureError;
+
+impl fmt::Display for StructureError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "Could not understand source directory structure")
+    }
+}
+
+impl Error for StructureError {}
