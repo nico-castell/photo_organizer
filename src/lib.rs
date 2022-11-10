@@ -59,6 +59,7 @@ impl Config {
 /// }
 /// ```
 pub fn run(config: Config) -> Result<(), &'static str> {
+    // TODO: Implement proper error propagation.
     let (source, destination) = (config.source, config.destination);
 
     let source = Path::new(&source);
@@ -72,7 +73,18 @@ pub fn run(config: Config) -> Result<(), &'static str> {
         return Err("Destination directory does not exist.");
     }
 
-    file_ops::visit_only_dirs(source).unwrap();
+    use file_ops::DirTree;
+
+    let dir_tree = match DirTree::build(&source) {
+        Ok(tree) => tree,
+        Err(_) => return Err("Could not read source directory structure.")
+    };
+
+    let organized_dir_tree = dir_tree.organize();
+
+    if let Err(_) = organized_dir_tree.construct() {
+        return Err("Error creating destination directory structure.");
+    }
 
     Ok(())
 }
