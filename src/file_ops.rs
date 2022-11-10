@@ -66,10 +66,14 @@ impl FileList {
     /// This function may result in an error in case:
     /// - The files don't contain valid UTF-8 data.
     /// - You don't have permissions to edit the destination.
-    pub fn organize(self, source: &str, destination: &str) -> Result<(), Box<dyn Error>> {
+    pub fn organize(
+        self,
+        override_present: &bool,
+        source: &str,
+        destination: &str,
+    ) -> Result<(), Box<dyn Error>> {
         let mut list = RefCell::borrow_mut(&self.list);
 
-        // TODO: Implement file conflict handling
         for entry in list.iter_mut() {
             let mut s_entry = entry
                 .to_str()
@@ -99,7 +103,9 @@ impl FileList {
             if extension == "" {
                 fs::create_dir_all(to.as_path())?;
             } else {
-                fs::copy(from, to.as_path())?;
+                if !to.exists() | override_present {
+                    fs::copy(from, to.as_path())?;
+                }
             }
 
             if s_entry.contains(".aae") {
