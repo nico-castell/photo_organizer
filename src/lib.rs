@@ -62,10 +62,7 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
 
     let source_path = PathBuf::from(&source);
     if !source_path.is_dir() {
-        return Err(RunError {
-            message: "Source directory does not exist.",
-        }
-        .into());
+        return Err(SourceDirNotExists.into());
     }
 
     use file_ops::FileList;
@@ -83,17 +80,15 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
 }
 
 #[derive(Debug, Clone)]
-struct RunError {
-    message: &'static str,
-}
+struct SourceDirNotExists;
 
-impl fmt::Display for RunError {
+impl fmt::Display for SourceDirNotExists {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.message)
+        write!(f, "Source directory does not exist")
     }
 }
 
-impl Error for RunError {}
+impl Error for SourceDirNotExists {}
 
 #[cfg(test)]
 mod tests {
