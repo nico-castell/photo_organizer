@@ -6,8 +6,7 @@
 ~*
 $RECYCLE.BIN/
 
-# Exclude test and tmp files
-*test*
+# Exclude tmp files
 *tmp*
 
 # Exclude build folder
