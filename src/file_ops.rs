@@ -21,21 +21,15 @@ impl DirTree {
                 for entry in fs::read_dir(dir)? {
                     let entry = entry?;
                     let path = entry.path();
-                    let node = Rc::new(Node {
+                    let new_node = Rc::new(Node {
                         name: RefCell::new(PathBuf::from(&path)),
                         parent: RefCell::new(Rc::downgrade(&node)),
                         children: RefCell::new(vec![]),
                     });
-                    node.parent
-                        .borrow()
-                        .upgrade()
-                        .expect("The inner value should not be dropped by the preceding code.")
-                        .children
-                        .borrow_mut()
-                        .push(Rc::clone(&node));
+                    node.children.borrow_mut().push(Rc::clone(&new_node));
 
                     if path.is_dir() {
-                        build_node_tree(Rc::clone(&node))?;
+                        build_node_tree(Rc::clone(&new_node))?;
                     }
                 }
             }
