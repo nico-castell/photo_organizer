@@ -1,4 +1,6 @@
-use std::{fs, path::Path};
+use std::path::Path;
+
+mod file_ops;
 
 pub struct Config {
     source: String,
@@ -69,6 +71,8 @@ pub fn run(config: Config) -> Result<(), &'static str> {
     if !destination.is_dir() {
         return Err("Destination directory does not exist.");
     }
+
+    file_ops::visit_only_dirs(source).unwrap();
 
     Ok(())
 }
