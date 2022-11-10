@@ -1,4 +1,4 @@
-use std::{env, error::Error};
+use std::{fs, path::Path};
 
 pub struct Config {
     source: String,
@@ -28,7 +28,6 @@ impl Config {
             source,
             destination,
         })
-
     }
 }
 
@@ -44,16 +43,34 @@ impl Config {
 ///
 /// ```
 /// # use photo_organizer::*;
-/// # let config = Config {
-/// #     source: String::from("/source"),
-/// #     destination: String::from("/destination")
-/// # }
+/// # let args = vec![
+/// #     String::from("program_name"),
+/// #     String::from("/"),
+/// #     String::from("/"),
+/// # ];
+/// # let config = match Config::build(args.into_iter()) {
+/// #     Ok(config) => config,
+/// #     Err(error) => panic!("Failed to build `Config`: {}", error),
+/// # };
 /// if let Err(error) = run(config) {
-///     panic!"Application error: {e}");
+///     panic!("Application error: {error}");
 /// }
 /// ```
-pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    return Ok(());
+pub fn run(config: Config) -> Result<(), &'static str> {
+    let (source, destination) = (config.source, config.destination);
+
+    let source = Path::new(&source);
+    let destination = Path::new(&destination);
+
+    if !source.is_dir() {
+        return Err("Source directory does not exist.");
+    }
+
+    if !destination.is_dir() {
+        return Err("Destination directory does not exist.");
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]
