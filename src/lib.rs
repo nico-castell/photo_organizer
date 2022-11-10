@@ -76,7 +76,7 @@ Options:
 /// # Examples
 ///
 /// ```
-/// # use photo_organizer::*;
+/// # use iphone_organizer::*;
 /// # let args = vec![
 /// #     String::from("program_name"),
 /// #     String::from("/"),

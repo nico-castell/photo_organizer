@@ -1,6 +1,6 @@
 use std::{env, process};
 
-use photo_organizer::Config;
+use iphone_organizer::Config;
 
 fn main() {
     // Handle `--help` and `-h`
@@ -19,7 +19,7 @@ fn main() {
     };
 
     // Run the program
-    if let Err(error) = photo_organizer::run(config) {
+    if let Err(error) = iphone_organizer::run(config) {
         eprintln!("Application error: {}", error);
         process::exit(2);
     }
