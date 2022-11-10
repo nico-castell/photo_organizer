@@ -80,10 +80,6 @@ impl FileList {
                 s_entry = s_entry.chars().filter(|char| char != &'_').collect();
             }
 
-            if s_entry.contains(".AAE") {
-                println!("{}", s_entry);
-            }
-
             let extension = match &entry.extension() {
                 Some(extension) => extension.to_str().unwrap(),
                 None => "",
@@ -98,6 +94,10 @@ impl FileList {
                 fs::create_dir_all(to.as_path())?;
             } else {
                 fs::copy(from, to.as_path())?;
+            }
+
+            if s_entry.contains(".aae") {
+                println!("{}", s_entry);
             }
         }
 
