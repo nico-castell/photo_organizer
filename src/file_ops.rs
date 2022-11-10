@@ -29,7 +29,7 @@ impl FileList {
             let dir = list
                 .borrow()
                 .get(list.borrow().len() - 1)
-                .unwrap()
+                .expect("The program will error during the config phase if there are no directories in the list.")
                 .to_path_buf();
             if dir.is_dir() {
                 for entry in fs::read_dir(dir)? {
@@ -69,8 +69,12 @@ impl FileList {
     pub fn organize(self, source: &str, destination: &str) -> Result<(), Box<dyn Error>> {
         let mut list = RefCell::borrow_mut(&self.list);
 
+        // TODO: Implement file conflict handling
         for entry in list.iter_mut() {
-            let mut s_entry = entry.to_str().unwrap().replace(&source, &destination);
+            let mut s_entry = entry
+                .to_str()
+                .expect("The program will have already panicked if there's invalid UTF-8")
+                .replace(&source, &destination);
 
             let s_entry_chars = s_entry.chars().count();
             let destination_chars = destination.chars().count() + 5;
@@ -80,8 +84,10 @@ impl FileList {
                 s_entry = s_entry.chars().filter(|char| char != &'_').collect();
             }
 
-            let extension = match &entry.extension() {
-                Some(extension) => extension.to_str().unwrap(),
+            let extension = match entry.extension() {
+                Some(extension) => extension
+                    .to_str()
+                    .expect("The program will have already panicked if there's invalid UTF-8"),
                 None => "",
             };
             s_entry = s_entry.replace(&extension, &extension.to_lowercase());
