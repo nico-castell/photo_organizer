@@ -31,6 +31,24 @@ impl Config {
             destination,
         })
     }
+
+    /// Prints the configuration options to stderr.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// print_config()
+    /// ```
+    pub fn print_config() {
+    eprint!(
+"\
+\x1B[01mphoto_organizer SOURCE DESTINATION [OPTIONS]\x1B[00m\n
+Options:
+   -s | --skip     ) Skips all files that are already present at DESTINATION.
+                     This is the default.\n
+   -o | --override ) Replaces files already present at DESTINATION with the version from SOURCE.
+");
+    }
 }
 
 /// Runs the configured copy and organization of files.
