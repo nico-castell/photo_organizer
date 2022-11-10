@@ -5,12 +5,31 @@ use std::{
     rc::Rc,
 };
 
-pub struct SourceTree {
+/// A struct that contains the file list as needed by the file_ops module.
+///
+/// # Examples
+///
+/// ```ignore
+/// # mod photo_organizer::file_ops;
+/// # use std::path::PathBuf;
+/// let source = PathBuf::from("/home/user");
+/// let file_list = match FileList::build(&source) {
+///     Ok(list) => list,
+///     Err(error) => panic!{"{}", error},
+/// };
+/// ```
+pub struct FileList {
     list: Rc<RefCell<Vec<PathBuf>>>,
 }
 
-impl SourceTree {
-    pub fn build(source: &Path) -> Result<SourceTree, &'static str> {
+impl FileList {
+    /// Reads the `source` directory and returns a Result which wraps the file list if Ok and an
+    /// error message if Err.
+    ///
+    /// # Errors
+    ///
+    /// this constructor can fail if it fails to read the source directory structure.
+    pub fn build(source: &PathBuf) -> Result<FileList, &'static str> {
         fn build_list(mut list: Rc<RefCell<Vec<PathBuf>>>) -> io::Result<()> {
             let dir = list
                 .borrow()
@@ -43,9 +62,14 @@ impl SourceTree {
             return Err("Could not read source directory structure.");
         }
 
-        Ok(SourceTree { list })
+        Ok(FileList { list })
     }
 
+    /// Creates the directory with the organized files.
+    ///
+    /// # Errors
+    ///
+    /// This function may result in an error in case the files don't contain valid UTF-8 data.
     pub fn organize(self, source: &str, destination: &str) -> Result<(), &'static str> {
         let mut list = RefCell::borrow_mut(&self.list);
 
