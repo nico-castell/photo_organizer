@@ -106,7 +106,7 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
         Err(error) => return Err(error.into()),
     };
 
-    if let Err(error) = file_list.organize(&override_present, &source, &destination) {
+    if let Err(error) = file_list.organize(override_present, &source, &destination) {
         return Err(error.into());
     }
 

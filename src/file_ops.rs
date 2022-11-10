@@ -68,7 +68,7 @@ impl FileList {
     /// - You don't have permissions to edit the destination.
     pub fn organize(
         self,
-        override_present: &bool,
+        override_present: bool,
         source: &str,
         destination: &str,
     ) -> Result<(), Box<dyn Error>> {
@@ -103,7 +103,7 @@ impl FileList {
             if extension == "" {
                 fs::create_dir_all(to.as_path())?;
             } else {
-                if !to.exists() | override_present {
+                if !to.exists() || override_present {
                     fs::copy(from, to.as_path())?;
                 }
             }
