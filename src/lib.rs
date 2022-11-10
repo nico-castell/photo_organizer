@@ -13,7 +13,7 @@ impl Config {
     /// # Errors
     ///
     /// The function can fail `args` does not contain source and destination paths.
-    pub fn build(mut args: impl Iterator<Item = String>) -> result::Result<Config, &'static str> {
+    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
         args.next();
 
         let source = String::from(match args.next() {
