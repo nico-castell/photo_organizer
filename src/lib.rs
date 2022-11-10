@@ -8,7 +8,7 @@ pub struct Config {
 }
 
 impl Config {
-    /// Creates a `Config` type
+    /// Creates a `Config` type. Assumes the first iteration of `args` is the program name.
     ///
     /// # Errors
     ///
@@ -73,9 +73,9 @@ pub fn run(config: Config) -> Result<(), &'static str> {
         return Err("Destination directory does not exist.");
     }
 
-    use file_ops::DirTree;
+    use file_ops::SourceTree;
 
-    let dir_tree = match DirTree::build(&source) {
+    let dir_tree = match SourceTree::build(&source) {
         Ok(tree) => tree,
         Err(_) => return Err("Could not read source directory structure.")
     };
