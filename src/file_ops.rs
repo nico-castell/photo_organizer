@@ -73,7 +73,7 @@ impl FileList {
         for entry in list.iter_mut() {
             let mut s_entry = entry
                 .to_str()
-                .expect("The program will have already panicked if there's invalid UTF-8")
+                .expect("The program will have already ended if there's invalid UTF-8")
                 .replace(&source, &destination);
 
             let s_entry_chars = s_entry.chars().count();
@@ -87,7 +87,7 @@ impl FileList {
             let extension = match entry.extension() {
                 Some(extension) => extension
                     .to_str()
-                    .expect("The program will have already panicked if there's invalid UTF-8"),
+                    .expect("The program will have already ended if there's invalid UTF-8"),
                 None => "",
             };
             s_entry = s_entry.replace(&extension, &extension.to_lowercase());
