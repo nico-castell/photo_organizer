@@ -2,7 +2,7 @@
 [![Commits since last release](https://img.shields.io/github/commits-since/nico-castell/photo_organizer/latest?label=Commits%20since%20last%20release&color=informational&logo=Git&logoColor=white&style=flat-square)](https://github.com/nico-castell/photo_organizer/commits)
 [![Release](https://img.shields.io/github/v/release/nico-castell/photo_organizer?label=Release&color=informational&logo=GitHub&logoColor=white&style=flat-square)](https://github.com/nico-castell/photo_organizer/releases)
 [![License](https://img.shields.io/github/license/nico-castell/photo_organizer?label=License&color=informational&logo=Open%20Source%20Initiative&logoColor=white&style=flat-square)](LICENSE)
-<!-- [![CodeQL](https://img.shields.io/github/workflow/status/nico-castell/photo_organizer/CodeQL?label=CodeQL&logo=GitHub%20Actions&logoColor=white&style=flat-square)](https://github.com/nico-castell/photo_organizer/actions/workflows/codeql-analysis.yml) -->
+[![Tests](https://img.shields.io/github/workflow/status/nico-castell/photo_organizer/tests?label=tests&logo=GitHub%20Actions&logoColor=white&style=flat-square)](https://github.com/nico-castell/photo_organizer/actions/workflows/rust-tests.yml)
 
 This program can take all of the files in the DCIM folder of an iPhone and organize them following a
 directory structure like what follows:
