@@ -1,20 +1,28 @@
 use std::{
     cell::RefCell,
+    error::Error,
     fs, io,
     path::{Path, PathBuf},
     rc::{Rc, Weak},
 };
 
-pub struct DirTree {
+#[derive(Debug)]
+struct Node {
+    name: RefCell<PathBuf>,
+    parent: RefCell<Weak<Node>>,
+    children: RefCell<Vec<Rc<Node>>>,
+}
+
+pub struct SourceTree {
     initial_node: Rc<Node>,
 }
 
-pub struct OrganizedDirTree {
+pub struct DestinationTree {
     initial_node: Rc<Node>,
 }
 
-impl DirTree {
-    pub fn build(source: &Path) -> Result<DirTree, &'static str> {
+impl SourceTree {
+    pub fn build(source: &Path) -> Result<SourceTree, &'static str> {
         fn build_node_tree(node: Rc<Node>) -> io::Result<()> {
             let dir = node.name.borrow().to_path_buf();
             if dir.is_dir() {
@@ -48,11 +56,11 @@ impl DirTree {
             return Err("Could not read source directory structure.");
         }
 
-        Ok(DirTree { initial_node })
+        Ok(SourceTree { initial_node })
     }
 
-    pub fn organize(self) -> OrganizedDirTree {
-        OrganizedDirTree {
+    pub fn organize(self) -> DestinationTree {
+        DestinationTree {
             initial_node: Rc::new(Node {
                 name: RefCell::new(PathBuf::new()),
                 parent: RefCell::new(Weak::new()),
@@ -62,15 +70,8 @@ impl DirTree {
     }
 }
 
-impl OrganizedDirTree {
+impl DestinationTree {
     pub fn construct(&self) -> io::Result<()> {
         Ok(())
     }
-}
-
-#[derive(Debug)]
-struct Node {
-    name: RefCell<PathBuf>,
-    parent: RefCell<Weak<Node>>,
-    children: RefCell<Vec<Rc<Node>>>,
 }
