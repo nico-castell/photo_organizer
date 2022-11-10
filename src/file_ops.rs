@@ -52,7 +52,7 @@ impl FileList {
 
         let list = Rc::new(RefCell::new(vec![PathBuf::from(source)]));
 
-        if let Err(_) = build_list(Rc::clone(&list)) {
+        if build_list(Rc::clone(&list)).is_err() {
             return Err(StructureError.into());
         }
 
@@ -78,7 +78,7 @@ impl FileList {
             let mut s_entry = entry
                 .to_str()
                 .expect("The program will have already ended if there's invalid UTF-8")
-                .replace(&source, &destination);
+                .replace(source, destination);
 
             let s_entry_chars = s_entry.chars().count();
             let destination_chars = destination.chars().count() + 5;
@@ -94,18 +94,16 @@ impl FileList {
                     .expect("The program will have already ended if there's invalid UTF-8"),
                 None => "",
             };
-            s_entry = s_entry.replace(&extension, &extension.to_lowercase());
+            s_entry = s_entry.replace(extension, &extension.to_lowercase());
 
-            let from = entry.as_path().clone();
+            let from = entry.as_path();
 
             let to = PathBuf::from(&s_entry);
 
-            if extension == "" {
+            if extension.is_empty() {
                 fs::create_dir_all(to.as_path())?;
-            } else {
-                if !to.exists() || override_present {
-                    fs::copy(from, to.as_path())?;
-                }
+            } else if !to.exists() || override_present {
+                fs::copy(from, to.as_path())?;
             }
 
             if s_entry.contains(".aae") {

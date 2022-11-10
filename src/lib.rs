@@ -17,15 +17,15 @@ impl Config {
     pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
         args.next();
 
-        let source = String::from(match args.next() {
-            Some(file) => String::from(file),
+        let source = match args.next() {
+            Some(file) => file,
             None => return Err("Didn't get a source directory"),
-        });
+        };
 
-        let destination = String::from(match args.next() {
-            Some(file) => String::from(file),
+        let destination = match args.next() {
+            Some(file) => file,
             None => return Err("Didn't get a destination directory"),
-        });
+        };
 
         let mut override_present = false;
 
@@ -105,12 +105,10 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
 
     let file_list = match FileList::build(&source_path) {
         Ok(list) => list,
-        Err(error) => return Err(error.into()),
+        Err(error) => return Err(error),
     };
 
-    if let Err(error) = file_list.organize(override_present, &source, &destination) {
-        return Err(error.into());
-    }
+    file_list.organize(override_present, &source, &destination)?;
 
     Ok(())
 }

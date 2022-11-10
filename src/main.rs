@@ -4,7 +4,7 @@ use iphone_organizer::Config;
 
 fn main() {
     // Handle `--help` and `-h`
-    if env::args().find(|arg| arg == "--help" || arg == "-h").is_some() {
+    if env::args().any(|arg| arg == "--help" || arg == "-h") {
         Config::print_config();
         process::exit(0);
     }
