@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "photo_organizer"
+name = "iphone_organizer"
 version = "1.0.0"
