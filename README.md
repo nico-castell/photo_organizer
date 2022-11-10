@@ -51,5 +51,23 @@ $ iphone_organizer ~/DCIM ~/PhoneImport
 /home/user/PhoneImport/2021/12/IMG8002.aae
 ```
 
+There are a couple of flags available for the command, you can see them all by running the following
+command:
+
+```
+$ iphone_organizer --help
+iphone_organizer SOURCE DESTINATION [OPTIONS]
+Version: 1.0.2
+
+Options:
+   -s | --skip     ) Skips all files that are already present at DESTINATION.
+                     This is the default.
+
+   -o | --override ) Replaces files already present at DESTINATION with the
+                     version from SOURCE.
+
+   -h | --help     ) Prints this help information.
+```
+
 ## About
 This program and this repository are availabe under an [MIT License](LICENSE).
