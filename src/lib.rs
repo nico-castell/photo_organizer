@@ -5,10 +5,11 @@ mod file_ops;
 pub struct Config {
     source: String,
     destination: String,
+    override_present: bool,
 }
 
 impl Config {
-    /// Creates a `Config` type. Assumes the first iteration of `args` is the program name.
+    /// Creates a `Config` type. **Assumes** the first iteration of `args` is the program name.
     ///
     /// # Errors
     ///
@@ -26,9 +27,20 @@ impl Config {
             None => return Err("Didn't get a destination directory"),
         });
 
+        let mut override_present = false;
+
+        for arg in args {
+            let arg = arg.as_str();
+            match arg {
+                "-o" | "--override" => override_present = true,
+                _ => continue,
+            }
+        }
+
         Ok(Config {
             source,
             destination,
+            override_present,
         })
     }
 
@@ -40,14 +52,15 @@ impl Config {
     /// print_config()
     /// ```
     pub fn print_config() {
-    eprint!(
-"\
+        eprint!(
+            "\
 \x1B[01mphoto_organizer SOURCE DESTINATION [OPTIONS]\x1B[00m\n
 Options:
    -s | --skip     ) Skips all files that are already present at DESTINATION.
                      This is the default.\n
    -o | --override ) Replaces files already present at DESTINATION with the version from SOURCE.
-");
+"
+        );
     }
 }
 
@@ -76,7 +89,8 @@ Options:
 /// }
 /// ```
 pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
-    let (source, destination) = (config.source, config.destination);
+    let (source, destination, override_present) =
+        (config.source, config.destination, config.override_present);
 
     let source_path = PathBuf::from(&source);
     if !source_path.is_dir() {
@@ -90,7 +104,7 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
         Err(error) => return Err(error.into()),
     };
 
-    if let Err(error) = file_list.organize(&source, &destination) {
+    if let Err(error) = file_list.organize(&override_present, &source, &destination) {
         return Err(error.into());
     }
 
