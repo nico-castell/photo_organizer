@@ -1,43 +1,41 @@
 use std::{
+    borrow::BorrowMut,
     cell::RefCell,
     error::Error,
+    ffi::OsStr,
     fs, io,
     path::{Path, PathBuf},
     rc::{Rc, Weak},
 };
 
-#[derive(Debug)]
-struct Node {
-    name: RefCell<PathBuf>,
-    parent: RefCell<Weak<Node>>,
-    children: RefCell<Vec<Rc<Node>>>,
-}
-
 pub struct SourceTree {
-    initial_node: Rc<Node>,
+    list: Rc<RefCell<Vec<PathBuf>>>,
 }
 
 pub struct DestinationTree {
-    initial_node: Rc<Node>,
+    list: Rc<RefCell<Vec<PathBuf>>>,
 }
 
 impl SourceTree {
     pub fn build(source: &Path) -> Result<SourceTree, &'static str> {
-        fn build_node_tree(node: Rc<Node>) -> io::Result<()> {
-            let dir = node.name.borrow().to_path_buf();
+        fn build_list(mut list: Rc<RefCell<Vec<PathBuf>>>) -> io::Result<()> {
+            let dir = list
+                .borrow()
+                .get(list.borrow().len() - 1)
+                .unwrap()
+                .to_path_buf();
             if dir.is_dir() {
                 for entry in fs::read_dir(dir)? {
                     let entry = entry?;
                     let path = entry.path();
-                    let new_node = Rc::new(Node {
-                        name: RefCell::new(PathBuf::from(&path)),
-                        parent: RefCell::new(Rc::downgrade(&node)),
-                        children: RefCell::new(vec![]),
-                    });
-                    node.children.borrow_mut().push(Rc::clone(&new_node));
+
+                    unsafe {
+                        let mut list = list.as_ptr();
+                        (*list).push(PathBuf::from(&path));
+                    }
 
                     if path.is_dir() {
-                        build_node_tree(Rc::clone(&new_node))?;
+                        build_list(Rc::clone(&list));
                     }
                 }
             }
@@ -45,27 +43,48 @@ impl SourceTree {
             Ok(())
         }
 
-        let initial_node = Rc::new(Node {
-            name: RefCell::new(PathBuf::from(&source)),
-            parent: RefCell::new(Weak::new()),
-            children: RefCell::new(vec![]),
-        });
+        let list = Rc::new(RefCell::new(vec![PathBuf::from(source)]));
 
         // TODO: Implement proper error propagation.
-        if let Err(_) = build_node_tree(Rc::clone(&initial_node)) {
+        if let Err(_) = build_list(Rc::clone(&list)) {
             return Err("Could not read source directory structure.");
         }
 
-        Ok(SourceTree { initial_node })
+        Ok(SourceTree { list })
     }
 
-    pub fn organize(self) -> DestinationTree {
+    pub fn organize(self, source: &str, destination: &str) -> DestinationTree {
+        let mut list = RefCell::borrow_mut(&self.list);
+
+        for mut entry in list.iter_mut() {
+            let mut s_entry = entry.to_str().unwrap().replace(&source, &destination);
+
+            let s_entry_chars = s_entry.chars().count();
+            let destination_chars = destination.chars().count() + 5;
+
+            if s_entry_chars > destination_chars {
+                s_entry.insert(destination_chars, '/');
+                s_entry = s_entry.chars().filter(|char| char != &'_').collect();
+            }
+
+            if s_entry.contains(".AAE") {
+                println!("{}", s_entry);
+            }
+
+            let extension = match entry.extension() {
+                Some(extension) => extension.to_str().unwrap(),
+                None => "",
+            };
+            s_entry = s_entry.replace(&extension, &extension.to_lowercase());
+
+            entry.clear();
+            entry.push(&s_entry);
+        }
+
+        drop(list);
+
         DestinationTree {
-            initial_node: Rc::new(Node {
-                name: RefCell::new(PathBuf::new()),
-                parent: RefCell::new(Weak::new()),
-                children: RefCell::new(vec![]),
-            }),
+            list: self.list
         }
     }
 }

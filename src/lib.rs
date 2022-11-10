@@ -62,25 +62,25 @@ pub fn run(config: Config) -> Result<(), &'static str> {
     // TODO: Implement proper error propagation.
     let (source, destination) = (config.source, config.destination);
 
-    let source = Path::new(&source);
-    let destination = Path::new(&destination);
+    let source_path = Path::new(&source);
+    let destination_path = Path::new(&destination);
 
-    if !source.is_dir() {
+    if !source_path.is_dir() {
         return Err("Source directory does not exist.");
     }
 
-    if !destination.is_dir() {
+    if !destination_path.is_dir() {
         return Err("Destination directory does not exist.");
     }
 
     use file_ops::SourceTree;
 
-    let dir_tree = match SourceTree::build(&source) {
+    let dir_tree = match SourceTree::build(&source_path) {
         Ok(tree) => tree,
         Err(_) => return Err("Could not read source directory structure.")
     };
 
-    let organized_dir_tree = dir_tree.organize();
+    let organized_dir_tree = dir_tree.organize(&source, &destination);
 
     if let Err(_) = organized_dir_tree.construct() {
         return Err("Error creating destination directory structure.");
