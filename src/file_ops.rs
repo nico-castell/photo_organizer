@@ -67,7 +67,7 @@ impl FileList {
     /// - The files don't contain valid UTF-8 data.
     /// - You don't have permissions to edit the destination.
     pub fn organize(
-        self,
+        &self,
         override_present: bool,
         source: &str,
         destination: &str,

@@ -110,6 +110,8 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
 
     file_list.organize(override_present, &source, &destination)?;
 
+    file_list.lean(&destination)?;
+
     Ok(())
 }
 
