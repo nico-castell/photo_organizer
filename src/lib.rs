@@ -103,14 +103,19 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
 
     use file_ops::FileList;
 
-    let file_list = match FileList::build(&source_path) {
+    let source_list = match FileList::build(&source_path) {
         Ok(list) => list,
         Err(error) => return Err(error),
     };
 
-    file_list.organize(override_present, &source, &destination)?;
+    source_list.organize(override_present, &source, &destination)?;
 
-    file_list.lean(&destination)?;
+    let destination_list = match FileList::build(&PathBuf::from(&destination)) {
+        Ok(list) => list,
+        Err(error) => return Err(error),
+    };
+
+    source_list.lean(&destination_list)?;
 
     Ok(())
 }
