@@ -67,6 +67,7 @@ Options:
    -o | --override ) Replaces files already present at DESTINATION with the
                      version from SOURCE.\n
    -h | --help     ) Prints this help information.
+   -l | --lean     ) Remove files present at DESTINATION but not SOURCE.\n
 ", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")
         );
     }
