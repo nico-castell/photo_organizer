@@ -113,6 +113,13 @@ impl FileList {
         Ok(())
     }
 
+    /// Remove files present at DESTINATION but not SOURCE. Here SOURCE is `&self` and DESTINATION
+    /// is `destination: &Self`.
+    ///
+    /// # Errors
+    ///
+    /// This method will result in an error if there are problems deleting the files, such as lack
+    /// of permissions to do so.
     pub fn lean(&self, destination: &Self) -> Result<(), Box<dyn Error>> {
         let source_list = self.list.borrow();
         let destination_list = destination.list.borrow();
@@ -133,15 +140,15 @@ impl FileList {
 
             let source = source_list[index - offset]
                 .file_name()
-                .unwrap()
+                .expect("The program will have already ended if there's invalid UTF-8")
                 .to_str()
-                .unwrap()
+                .expect("The program will have already ended if there's invalid UTF-8")
                 .to_uppercase();
             let destination = destination_list[index]
                 .file_name()
-                .unwrap()
+                .expect("The program will have already ended if there's invalid UTF-8")
                 .to_str()
-                .unwrap()
+                .expect("The program will have already ended if there's invalid UTF-8")
                 .to_uppercase();
 
             if source != destination && destination_list[index].is_file() {
