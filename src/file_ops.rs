@@ -85,7 +85,8 @@ impl FileList {
 
             if s_entry_chars > destination_chars {
                 s_entry.insert(destination_chars, '/');
-                s_entry = s_entry.chars().filter(|char| char != &'_').collect();
+                _ = s_entry.remove(destination_chars + 3);
+                _ = s_entry.remove(destination_chars + 3);
             }
 
             let extension = match entry.extension() {
