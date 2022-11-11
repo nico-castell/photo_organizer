@@ -1,4 +1,4 @@
-use std::{cell::RefCell, error::Error, fmt, fs, io, path::PathBuf, rc::Rc};
+use std::{cell::RefCell, error::Error, fs, io, path::PathBuf, rc::Rc};
 
 /// A struct that contains the file list as needed by the file_ops module.
 ///
@@ -52,9 +52,7 @@ impl FileList {
 
         let list = Rc::new(RefCell::new(vec![PathBuf::from(source)]));
 
-        if build_list(Rc::clone(&list)).is_err() {
-            return Err(StructureError.into());
-        }
+        build_list(Rc::clone(&list))?;
 
         Ok(FileList { list })
     }
@@ -115,14 +113,3 @@ impl FileList {
         Ok(())
     }
 }
-
-#[derive(Debug, Clone)]
-pub struct StructureError;
-
-impl fmt::Display for StructureError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Could not understand source directory structure")
-    }
-}
-
-impl Error for StructureError {}
