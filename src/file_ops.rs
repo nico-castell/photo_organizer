@@ -142,15 +142,15 @@ impl FileList {
 
             let source = source_list[index - offset]
                 .file_name()
-                .unwrap()
+                .expect("The program will have already ended if there's invalid UTF-8")
                 .to_str()
-                .unwrap()
+                .expect("The program will have already ended if there's invalid UTF-8")
                 .to_uppercase();
             let destination = destination_list[index]
                 .file_name()
-                .unwrap()
+                .expect("The program will have already ended if there's invalid UTF-8")
                 .to_str()
-                .unwrap()
+                .expect("The program will have already ended if there's invalid UTF-8")
                 .to_uppercase();
 
             if source != destination && destination_list[index].is_file() {
