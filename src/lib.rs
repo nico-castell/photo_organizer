@@ -93,8 +93,7 @@ Options:
 /// }
 /// ```
 pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
-    let (source, destination, override_present) =
-        (config.source, config.destination, config.override_present);
+    let (source, destination) = (config.source, config.destination);
 
     let source_path = PathBuf::from(&source);
     if !source_path.is_dir() {
@@ -108,7 +107,7 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
         Err(error) => return Err(error),
     };
 
-    source_list.organize(override_present, &source, &destination)?;
+    source_list.organize(config.override_present, &source, &destination)?;
 
     let destination_list = match FileList::build(&PathBuf::from(&destination)) {
         Ok(list) => list,
