@@ -115,6 +115,13 @@ impl FileList {
         Ok(())
     }
 
+    /// Remove files present at DESTINATION but not SOURCE. Here SOURCE is `&self` and DESTINATION
+    /// is `destination: &Self`.
+    ///
+    /// # Errors
+    ///
+    /// This method will result in an error if there are problems deleting the files, such as lack
+    /// of permissions to do so.
     pub fn lean(&self, destination: &Self) -> Result<(), Box<dyn Error>> {
         let source_list = self.list.borrow();
         let destination_list = destination.list.borrow();
