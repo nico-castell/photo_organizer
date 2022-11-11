@@ -70,4 +70,4 @@ Options:
 ```
 
 ## About
-This program and this repository are availabe under an [MIT License](LICENSE).
+This program and this repository are available under an [MIT License](LICENSE).
