@@ -146,7 +146,7 @@ impl FileList {
                 .to_uppercase();
 
             if source != destination && destination_list[index].is_file() {
-                fs::remove_file(&destination_list[index])?;
+                fs::remove_file(destination_list[index])?;
                 offset += 1;
             }
             index += 1;
