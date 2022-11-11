@@ -8,18 +8,18 @@ This program can take all of the files in the DCIM folder of an iPhone and organ
 directory structure like what follows:
 
 ```
-/home/user/imported
+/home/user/PhoneImport
 ├── 2021
 │   ├── 11
-│   │   ├── IMG8000.jpg
-│   │   └── IMG8001.jpg
+│   │   ├── IMG_8000.jpg
+│   │   └── IMG_8001.jpg
 │   └── 12
-│       ├── IMG8002.jpg
-│       └── IMG8002.aae
+│       ├── IMG_8002.jpg
+│       └── IMG_8002.aae
 └── 2022
     └── 01
-        ├── IMG8003.jpg
-        └── IMG8004.jpg
+        ├── IMG_8003.jpg
+        └── IMG_8004.jpg
 ```
 
 ## Installation
@@ -48,7 +48,7 @@ If you have edited any photos in your phone, the app will print the name of the 
 
 ```
 $ iphone_organizer ~/DCIM ~/PhoneImport
-/home/user/PhoneImport/2021/12/IMG8002.aae
+/home/user/PhoneImport/2021/12/IMG_8002.aae
 ```
 
 There are a couple of flags available for the command, you can see them all by running the following
@@ -57,7 +57,7 @@ command:
 ```
 $ iphone_organizer --help
 iphone_organizer SOURCE DESTINATION [OPTIONS]
-Version: 1.0.2
+Version: 1.1.0
 
 Options:
    -s | --skip     ) Skips all files that are already present at DESTINATION.
@@ -65,6 +65,8 @@ Options:
 
    -o | --override ) Replaces files already present at DESTINATION with the
                      version from SOURCE.
+
+   -l | --lean     ) Remove files present at DESTINATION but not SOURCE.
 
    -h | --help     ) Prints this help information.
 ```
