@@ -6,6 +6,7 @@ pub struct Config {
     source: String,
     destination: String,
     override_present: bool,
+    lean: bool,
 }
 
 impl Config {
@@ -28,11 +29,13 @@ impl Config {
         };
 
         let mut override_present = false;
+        let mut lean = false;
 
         for arg in args {
             let arg = arg.as_str();
             match arg {
                 "-o" | "--override" => override_present = true,
+                "-l" | "--lean"     => lean = true,
                 _ => continue,
             }
         }
@@ -41,6 +44,7 @@ impl Config {
             source,
             destination,
             override_present,
+            lean
         })
     }
 
@@ -109,12 +113,14 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
 
     source_list.organize(config.override_present, &source, &destination)?;
 
-    let destination_list = match FileList::build(&PathBuf::from(&destination)) {
-        Ok(list) => list,
-        Err(error) => return Err(error),
-    };
+    if config.lean {
+        let destination_list = match FileList::build(&PathBuf::from(&destination)) {
+            Ok(list) => list,
+            Err(error) => return Err(error),
+        };
 
-    source_list.lean(&destination_list)?;
+        source_list.lean(&destination_list)?;
+    }
 
     Ok(())
 }
