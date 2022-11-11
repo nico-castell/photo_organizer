@@ -6,6 +6,7 @@ pub struct Config {
     source: String,
     destination: String,
     override_present: bool,
+    lean: bool,
 }
 
 impl Config {
@@ -28,11 +29,13 @@ impl Config {
         };
 
         let mut override_present = false;
+        let mut lean = false;
 
         for arg in args {
             let arg = arg.as_str();
             match arg {
                 "-o" | "--override" => override_present = true,
+                "-l" | "--lean"     => lean = true,
                 _ => continue,
             }
         }
@@ -41,6 +44,7 @@ impl Config {
             source,
             destination,
             override_present,
+            lean
         })
     }
 
@@ -63,6 +67,7 @@ Options:
    -o | --override ) Replaces files already present at DESTINATION with the
                      version from SOURCE.\n
    -h | --help     ) Prints this help information.
+   -l | --lean     ) Remove files present at DESTINATION but not SOURCE.\n
 ", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")
         );
     }
@@ -93,8 +98,7 @@ Options:
 /// }
 /// ```
 pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
-    let (source, destination, override_present) =
-        (config.source, config.destination, config.override_present);
+    let (source, destination) = (config.source, config.destination);
 
     let source_path = PathBuf::from(&source);
     if !source_path.is_dir() {
@@ -103,12 +107,21 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
 
     use file_ops::FileList;
 
-    let file_list = match FileList::build(&source_path) {
+    let source_list = match FileList::build(&source_path) {
         Ok(list) => list,
         Err(error) => return Err(error),
     };
 
-    file_list.organize(override_present, &source, &destination)?;
+    source_list.organize(config.override_present, &source, &destination)?;
+
+    if config.lean {
+        let destination_list = match FileList::build(&PathBuf::from(&destination)) {
+            Ok(list) => list,
+            Err(error) => return Err(error),
+        };
+
+        source_list.lean(&destination_list)?;
+    }
 
     Ok(())
 }
