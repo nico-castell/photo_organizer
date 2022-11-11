@@ -113,6 +113,48 @@ impl FileList {
 
         Ok(())
     }
+
+    pub fn lean(&self, destination: &Self) -> Result<(), Box<dyn Error>> {
+        let source_list = self.list.borrow();
+        let destination_list = destination.list.borrow();
+
+        let source_list: Vec<&PathBuf> = source_list.iter().filter(|file| !file.is_dir()).collect();
+        let destination_list: Vec<&PathBuf> = destination_list.iter().filter(|file| !file.is_dir()).collect();
+
+        let mut index = 0;
+        let mut offset = 0;
+
+        while index < destination_list.len() {
+            print!("{} {}", source_list[index - offset].display(), destination_list[index].display());
+
+            let source = source_list[index - offset]
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_uppercase();
+            let destination = destination_list[index]
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_uppercase();
+
+            print!(" {} {}", source, destination);
+
+            if source != destination && destination_list[index].is_file()
+            {
+                print!(" removing");
+                fs::remove_file(&destination_list[index])?;
+                offset += 1;
+            }
+            index += 1;
+
+            print!("\n");
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Debug, Clone)]
