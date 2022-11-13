@@ -124,10 +124,7 @@ impl FileList {
         let source_list = self.list.borrow();
         let destination_list = destination.list.borrow();
 
-        let source_list: Vec<&PathBuf> = source_list
-            .iter()
-            .filter(|file| !file.is_dir())
-            .collect();
+        let source_list: Vec<&PathBuf> = source_list.iter().filter(|file| !file.is_dir()).collect();
         let destination_list: Vec<&PathBuf> = destination_list
             .iter()
             .filter(|file| !file.is_dir())
@@ -137,7 +134,6 @@ impl FileList {
         let mut offset = 0;
 
         while index < destination_list.len() {
-
             let source = source_list[index - offset]
                 .file_name()
                 .expect("The program was run using a path ending in `..`")

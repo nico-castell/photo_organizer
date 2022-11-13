@@ -35,7 +35,7 @@ impl Config {
             let arg = arg.as_str();
             match arg {
                 "-o" | "--override" => override_present = true,
-                "-l" | "--lean"     => lean = true,
+                "-l" | "--lean" => lean = true,
                 _ => continue,
             }
         }
@@ -44,7 +44,7 @@ impl Config {
             source,
             destination,
             override_present,
-            lean
+            lean,
         })
     }
 
@@ -68,7 +68,9 @@ Options:
                      version from SOURCE.\n
    -l | --lean     ) Remove files present at DESTINATION but not SOURCE.\n
    -h | --help     ) Prints this help information.
-", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION")
+",
+            env!("CARGO_PKG_NAME"),
+            env!("CARGO_PKG_VERSION")
         );
     }
 }
