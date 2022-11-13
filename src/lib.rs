@@ -1,7 +1,8 @@
 use std::{error::Error, fmt, path::PathBuf, result};
 
-/// Internal module for file operations such as copying and removing.
-mod file_ops;
+/// Module for file operations such as copying and removing.
+pub mod file_ops;
+pub use file_ops::{lean, organize, FileList};
 
 /// The config for the organization of the iPhone images. Taken as an argument by the [`run`](run)
 /// function.
@@ -136,16 +137,14 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
         return Err(SourceDirNotExists.into());
     }
 
-    use file_ops::FileList;
-
     let source_list = FileList::build(&source_path)?;
 
-    source_list.organize(config.override_present, &source, &destination)?;
+    file_ops::organize(&source_list, config.override_present, &source, &destination)?;
 
     if config.lean {
         let destination_list = FileList::build(&PathBuf::from(&destination))?;
 
-        source_list.lean(&destination_list)?;
+        file_ops::lean(&destination_list, &source_list)?
     }
 
     Ok(())
