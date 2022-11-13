@@ -1,5 +1,6 @@
 use std::{error::Error, fmt, path::PathBuf, result};
 
+/// Internal module for file operations such as copying and removing.
 mod file_ops;
 
 /// The config for the organization of the iPhone images.
