@@ -68,8 +68,8 @@ impl FileList {
 ///
 /// Parameters
 /// - `file_list` - A [`FileList`](FileList).
-/// - `override_present` - A [`bool`](bool) that determines whether to skip files that are already at destination or to
-///   override them.
+/// - `override_present` - A [`bool`](bool) that determines whether to skip files that are already
+///   at destination or to override them.
 /// - `source` - A source [`&str`](&str).
 /// - `destination` - A destination [`&str`](&str).
 ///
