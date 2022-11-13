@@ -1,6 +1,22 @@
 use std::{cell::RefCell, error::Error, fs, io, path::PathBuf, rc::Rc};
 
-/// A struct that contains the file list as needed by the file_ops module.
+/// The list of files for organizing. Taken as an argument by the [`organize()`](organize) and
+/// [`lean()`](lean) functions.
+///
+/// # Examples
+/// You can create a `FileList` using `FileList::build()`:
+///
+/// ```
+/// # use iphone_organizer::file_ops::FileList;
+/// # use std::{path::PathBuf, fs};
+/// # let path = PathBuf::from("mockPATH");
+/// # fs::create_dir(&path);
+/// let file_list = match FileList::build(&path) {
+///     Ok(list) => list,
+///     Err(error) => panic!("{error}"),
+/// };
+/// # fs::remove_dir(&path);
+/// ```
 pub struct FileList {
     list: Rc<RefCell<Vec<PathBuf>>>,
 }
@@ -47,6 +63,13 @@ impl FileList {
 }
 
 /// Creates the directory with the organized files.
+///
+/// Parameters
+/// - `file_list` - A [`FileList`](FileList).
+/// - `override_present` - A [`bool`](bool) that determines whether to skip files that are already at destination or to
+///   override them.
+/// - `source` - A source [`&str`](&str).
+/// - `destination` - A destination [`&str`](&str).
 ///
 /// # Errors
 ///
@@ -102,7 +125,11 @@ pub fn organize(
     Ok(())
 }
 
-/// Remove files present at DESTINATION but not SOURCE.
+/// Removes files present at destination but not source.
+///
+/// Parameters:
+/// - `destination` - A [`FileList`](FileList) of the destination.
+/// - `source` -> [`FileList`](FileList) of the source.
 ///
 /// # Errors
 ///
