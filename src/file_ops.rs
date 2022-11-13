@@ -38,11 +38,13 @@ impl FileList {
             Ok(())
         }
 
-        let list = Rc::new(RefCell::new(vec![PathBuf::from(source)]));
+        {
+            let list = Rc::new(RefCell::new(vec![PathBuf::from(source)]));
 
-        build_list(Rc::clone(&list))?;
+            build_list(Rc::clone(&list))?;
 
-        Ok(FileList { list })
+            Ok(FileList { list })
+        }
     }
 
     /// Creates the directory with the organized files.
