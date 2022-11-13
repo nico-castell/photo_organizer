@@ -19,8 +19,8 @@ impl Config {
     ///
     /// # Errors
     ///
-    /// The function can fail `args` does not contain source and destination paths, or if one of the
-    /// flags isn't recognized.
+    /// The function can fail if `args` does not contain source and destination paths, or if one of
+    /// the flags isn't recognized.
     pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, Box<dyn Error>> {
         args.next();
 
