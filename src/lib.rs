@@ -13,7 +13,8 @@ pub struct Config {
 }
 
 impl Config {
-    /// Creates a `Config` type. **Assumes** the first iteration of `args` is the program name.
+    /// Creates a `Config` type. **Assumes** the first iteration of `args` is the program name, so
+    /// it's ignored.
     ///
     /// # Errors
     ///
