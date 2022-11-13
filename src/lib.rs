@@ -15,17 +15,17 @@ impl Config {
     /// # Errors
     ///
     /// The function can fail `args` does not contain source and destination paths.
-    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
+    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, Box<dyn Error>> {
         args.next();
 
         let source = match args.next() {
             Some(file) => file,
-            None => return Err("Didn't get a source directory"),
+            None => return Err("Didn't get a source directory".into()),
         };
 
         let destination = match args.next() {
             Some(file) => file,
-            None => return Err("Didn't get a destination directory"),
+            None => return Err("Didn't get a destination directory".into()),
         };
 
         let mut override_present = false;
@@ -35,8 +35,9 @@ impl Config {
             let arg = arg.as_str();
             match arg {
                 "-o" | "--override" => override_present = true,
+                "-s" | "--skip" => override_present = false,
                 "-l" | "--lean" => lean = true,
-                _ => continue,
+                other => return Err(format!("Unknown option: {}", other).into()),
             }
         }
 
