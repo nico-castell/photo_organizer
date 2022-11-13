@@ -3,7 +3,8 @@ use std::{error::Error, fmt, path::PathBuf, result};
 /// Internal module for file operations such as copying and removing.
 mod file_ops;
 
-/// The config for the organization of the iPhone images.
+/// The config for the organization of the iPhone images. Taken as an argument by the [`run`](run)
+/// function.
 ///
 /// You can create an instance of this struct using `Config::build()`.
 pub struct Config {
@@ -16,6 +17,9 @@ pub struct Config {
 impl Config {
     /// Creates a `Config` type. **Assumes** the first iteration of `args` is the program name, so
     /// it's ignored.
+    ///
+    /// Parameter:
+    /// - `args` - An iterator, meant to iterate over the binary's arguments and flags.
     ///
     /// # Errors
     ///
@@ -83,6 +87,9 @@ Options:
 }
 
 /// Runs the configured copy and organization of files.
+///
+/// Parameter:
+/// - `config` - A [`Config`](Config) that contains the configuration for the function.
 ///
 /// # Errors
 ///
