@@ -140,13 +140,13 @@ impl FileList {
 
             let source = source_list[index - offset]
                 .file_name()
-                .expect("The program will have already ended if there's invalid UTF-8")
+                .expect("The program was run using a path ending in `..`")
                 .to_str()
                 .expect("The program will have already ended if there's invalid UTF-8")
                 .to_uppercase();
             let destination = destination_list[index]
                 .file_name()
-                .expect("The program will have already ended if there's invalid UTF-8")
+                .expect("The program was run using a path ending in `..`")
                 .to_str()
                 .expect("The program will have already ended if there's invalid UTF-8")
                 .to_uppercase();
