@@ -133,12 +133,12 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
 
     let source_list = FileList::build(&source_path)?;
 
-    source_list.organize(config.override_present, &source, &destination)?;
+    file_ops::organize(&source_list, config.override_present, &source, &destination)?;
 
     if config.lean {
         let destination_list = FileList::build(&PathBuf::from(&destination))?;
 
-        source_list.lean(&destination_list)?;
+        file_ops::lean(&destination_list, &source_list)?
     }
 
     Ok(())
