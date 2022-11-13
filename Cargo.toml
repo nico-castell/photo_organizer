@@ -1,12 +1,13 @@
 [package]
 name = "iphone_organizer"
-version = "1.1.0"
+version = "1.1.1"
 edition = "2021"
 license = "MIT"
 description = "A tool to quickly organize photos imported from an iPhone."
 repository = "https://github.com/nico-castell/photo_organizer"
-documentation = "https://github.com/nico-castell/photo_organizer#readme"
 homepage = "https://github.com/nico-castell/photo_organizer"
+keywords = ["iphone", "terminal", "photos", "organize", "images"]
+categories = ["command-line-utilities"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
