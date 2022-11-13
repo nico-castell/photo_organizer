@@ -1,18 +1,6 @@
 use std::{cell::RefCell, error::Error, fs, io, path::PathBuf, rc::Rc};
 
 /// A struct that contains the file list as needed by the file_ops module.
-///
-/// # Examples
-///
-/// ```ignore
-/// # mod photo_organizer::file_ops;
-/// # use std::path::PathBuf;
-/// let source = PathBuf::from("/home/user");
-/// let file_list = match FileList::build(&source) {
-///     Ok(list) => list,
-///     Err(error) => panic!{"{}", error},
-/// };
-/// ```
 pub struct FileList {
     list: Rc<RefCell<Vec<PathBuf>>>,
 }
@@ -155,5 +143,21 @@ impl FileList {
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn file_list_builds() {
+        use std::{fs, path::PathBuf};
+
+        let source = PathBuf::from("mockSOURCE");
+
+        fs::create_dir(&source).expect("File operation create failing.");
+        let _ = FileList::build(&source).expect("Build function shouldn't fail.");
+        fs::remove_dir(&source).expect("File operation remove failing.");
     }
 }
