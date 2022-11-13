@@ -94,20 +94,31 @@ Options:
 ///
 /// # Examples
 ///
-/// ```ignore
+/// ```
 /// # use iphone_organizer::*;
+/// # use std::{fs, path::PathBuf};
+/// #
+/// # let mockSOURCE = PathBuf::from("mockSOURCE");
+/// # let mockDESTINATION = PathBuf::from("mockDESTINATION");
+/// #
+/// # fs::create_dir(&mockSOURCE);
+/// #
 /// # let args = vec![
 /// #     String::from("program_name"),
-/// #     String::from("/"),
-/// #     String::from("/"),
+/// #     String::from("mockSOURCE"),
+/// #     String::from("mockDESTINATION"),
 /// # ];
 /// # let config = match Config::build(args.into_iter()) {
 /// #     Ok(config) => config,
 /// #     Err(error) => panic!("Failed to build `Config`: {}", error),
 /// # };
+/// #
 /// if let Err(error) = run(config) {
 ///     panic!("Application error: {error}");
 /// }
+/// #
+/// # fs::remove_dir_all(&mockDESTINATION);
+/// # fs::remove_dir_all(&mockSOURCE);
 /// ```
 pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
     let (source, destination) = (config.source, config.destination);
