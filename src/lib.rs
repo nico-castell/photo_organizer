@@ -85,7 +85,11 @@ Options:
 /// # Errors
 ///
 /// This function will return an error if:
-/// - The source path does not exist.
+/// - The source path does not exist or isn't a directory.
+/// - The files contain invalid UTF-8 names.
+/// - The directory structures of source or destination fail to be read, because of lack of
+///   permissions or otherwise.
+/// - The files cannot be copied, read, or deleted.
 ///
 /// # Examples
 ///
