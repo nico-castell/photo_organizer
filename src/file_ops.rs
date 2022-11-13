@@ -102,8 +102,7 @@ pub fn organize(
     Ok(())
 }
 
-/// Remove files present at DESTINATION but not SOURCE. Here SOURCE is `&self` and DESTINATION
-/// is `destination: &Self`.
+/// Remove files present at DESTINATION but not SOURCE.
 ///
 /// # Errors
 ///
