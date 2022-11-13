@@ -2,6 +2,9 @@ use std::{error::Error, fmt, path::PathBuf, result};
 
 mod file_ops;
 
+/// The config for the organization of the iPhone images.
+///
+/// You can create an instance of this struct using `Config::build()`.
 pub struct Config {
     source: String,
     destination: String,
@@ -14,7 +17,8 @@ impl Config {
     ///
     /// # Errors
     ///
-    /// The function can fail `args` does not contain source and destination paths.
+    /// The function can fail `args` does not contain source and destination paths, or if one of the
+    /// flags isn't recognized.
     pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, Box<dyn Error>> {
         args.next();
 
