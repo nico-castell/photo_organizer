@@ -128,7 +128,7 @@ struct SourceDirNotExists;
 
 impl fmt::Display for SourceDirNotExists {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Source directory does not exist")
+        write!(f, "Source doesn't exist or is not a directory")
     }
 }
 
