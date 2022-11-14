@@ -177,15 +177,118 @@ pub fn lean(destination: &FileList, source: &FileList) -> Result<(), Box<dyn Err
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::{
+        fs::{self, File},
+        path::PathBuf,
+    };
+
+    // Using mockSOURCE_XX and mockDESTINATION_XX to avoid trouble during multithreaded testing.
 
     #[test]
     fn file_list_builds() {
-        use std::{fs, path::PathBuf};
-
-        let source = PathBuf::from("mockSOURCE");
+        let source = PathBuf::from("mockSOURCE_01");
 
         fs::create_dir(&source).expect("File operation create failing.");
         let _ = FileList::build(&source).expect("Build function shouldn't fail.");
         fs::remove_dir(&source).expect("File operation remove failing.");
+    }
+
+    #[test]
+    fn lean_function_works() -> Result<(), Box<dyn Error>> {
+        // Create the source file and directory structure.
+        {
+            fs::create_dir_all("mockSOURCE_02/202211__")?;
+            fs::create_dir_all("mockSOURCE_02/202212__")?;
+
+            File::create("mockSOURCE_02/202211__/IMG_8001.JPG")?;
+            // mockSOURCE_02/202211__/IMG_8002.JPG missing
+            File::create("mockSOURCE_02/202212__/IMG_8003.JPG")?;
+            File::create("mockSOURCE_02/202212__/IMG_8004.JPG")?;
+        }
+
+        // Crate the destination file and directory structure.
+        {
+            fs::create_dir_all("mockDESTINATION_02/2022/11")?;
+            fs::create_dir_all("mockDESTINATION_02/2022/12")?;
+
+            File::create("mockDESTINATION_02/2022/11/IMG_8001.jpg")?;
+            File::create("mockDESTINATION_02/2022/11/IMG_8002.jpg")?;
+            File::create("mockDESTINATION_02/2022/12/IMG_8003.jpg")?;
+            File::create("mockDESTINATION_02/2022/12/IMG_8004.jpg")?;
+        }
+
+        // Run the `lean()` function
+        {
+            let mock_source = PathBuf::from("mockSOURCE_02");
+            let mock_source = FileList::build(&mock_source)?;
+
+            let mock_destination = PathBuf::from("mockDESTINATION_02");
+            let mock_destination = FileList::build(&mock_destination)?;
+
+            lean(&mock_destination, &mock_source)?;
+        }
+
+        // Test that IMG_8002.jpg is no longer present
+        {
+            let test_file = PathBuf::from("mockDESTINATION_02/2022/11/IMG_8002.jpg");
+            if test_file.exists() {
+                panic!("The file that should have been deleted at DESTINATION is still present");
+            }
+        }
+
+        // Clean up
+        {
+            fs::remove_dir_all("mockSOURCE_02")?;
+            fs::remove_dir_all("mockDESTINATION_02")?;
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn organize_function_works() -> Result<(), Box<dyn Error>> {
+        // Create the source file and directory structure.
+        {
+            fs::create_dir_all("mockSOURCE_03/202211__")?;
+            fs::create_dir_all("mockSOURCE_03/202212__")?;
+
+            File::create("mockSOURCE_03/202211__/IMG_8001.JPG")?;
+            File::create("mockSOURCE_03/202211__/IMG_8002.JPG")?;
+            File::create("mockSOURCE_03/202212__/IMG_8003.JPG")?;
+            File::create("mockSOURCE_03/202212__/IMG_8004.JPG")?;
+        }
+
+        // Run the `organize()` function
+        {
+            let mock_source = PathBuf::from("mockSOURCE_03");
+            let mock_source = FileList::build(&mock_source)?;
+
+            organize(&mock_source, false, "mockSOURCE_03", "mockDESTINATION_03")
+                .expect("`organize()` function panicked");
+        }
+
+        // Test that all files and directories are properly organized
+        {
+            let file_list = vec![
+                PathBuf::from("mockDESTINATION_03/2022/11/IMG_8001.jpg"),
+                PathBuf::from("mockDESTINATION_03/2022/11/IMG_8002.jpg"),
+                PathBuf::from("mockDESTINATION_03/2022/12/IMG_8003.jpg"),
+                PathBuf::from("mockDESTINATION_03/2022/12/IMG_8004.jpg"),
+            ];
+
+            for file in file_list {
+                if !file.exists() {
+                    panic!("File {} was not copied", file.display());
+                }
+            }
+        }
+
+        // Clean up
+        {
+            fs::remove_dir_all("mockSOURCE_03")?;
+            fs::remove_dir_all("mockDESTINATION_03")?;
+        }
+
+        Ok(())
     }
 }

@@ -12,6 +12,9 @@ $RECYCLE.BIN/
 # Exclude build folder
 /[Tt]arget
 
+# Exclude test mocks
+mock*
+
 # Ignore vim files
 *~
 *.swp
