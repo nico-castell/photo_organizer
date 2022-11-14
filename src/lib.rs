@@ -169,15 +169,19 @@ mod tests {
     fn config_builds() {
         let args = vec![
             String::from("program_name"),
-            String::from("/path/to/source"),
-            String::from("/path/to/destination"),
+            String::from("mockSOURCE_lib"),
+            String::from("mockDESTINATION_lib"),
+            String::from("-l"),
+            String::from("-o"),
         ];
         let config = match Config::build(args.into_iter()) {
             Ok(config) => config,
             Err(error) => panic!("Failed to build `Config`: {}", error),
         };
 
-        assert_eq!(String::from("/path/to/source"), config.source);
-        assert_eq!(String::from("/path/to/destination"), config.destination);
+        assert_eq!(String::from("mockSOURCE_lib"), config.source);
+        assert_eq!(String::from("mockDESTINATION_lib"), config.destination);
+        assert_eq!(true, config.lean);
+        assert_eq!(true, config.override_present);
     }
 }
