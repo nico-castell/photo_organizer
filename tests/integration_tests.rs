@@ -1,4 +1,8 @@
-use std::{error::Error, fs::{self, File}, path::PathBuf};
+use std::{
+    error::Error,
+    fs::{self, File},
+    path::PathBuf,
+};
 
 use iphone_organizer::{self, Config};
 
