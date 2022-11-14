@@ -194,43 +194,38 @@ mod tests {
     }
 
     #[test]
-    fn lean_function_works() {
+    fn lean_function_works() -> Result<(), Box<dyn Error>> {
         // Create the source file and directory structure.
         {
-            fs::create_dir_all("mockSOURCE_02/202211__").expect("Could not create directories");
-            fs::create_dir_all("mockSOURCE_02/202212__").expect("Could not create directories");
+            fs::create_dir_all("mockSOURCE_02/202211__")?;
+            fs::create_dir_all("mockSOURCE_02/202212__")?;
 
-            File::create("mockSOURCE_02/202211__/IMG_8001.JPG").expect("Could not create files");
+            File::create("mockSOURCE_02/202211__/IMG_8001.JPG")?;
             // mockSOURCE_02/202211__/IMG_8002.JPG missing
-            File::create("mockSOURCE_02/202212__/IMG_8003.JPG").expect("Could not create files");
-            File::create("mockSOURCE_02/202212__/IMG_8004.JPG").expect("Could not create files");
+            File::create("mockSOURCE_02/202212__/IMG_8003.JPG")?;
+            File::create("mockSOURCE_02/202212__/IMG_8004.JPG")?;
         }
 
         // Crate the destination file and directory structure.
         {
-            fs::create_dir_all("mockDESTINATION_02/2022/11").expect("Could not create directories");
-            fs::create_dir_all("mockDESTINATION_02/2022/12").expect("Could not create directories");
+            fs::create_dir_all("mockDESTINATION_02/2022/11")?;
+            fs::create_dir_all("mockDESTINATION_02/2022/12")?;
 
-            File::create("mockDESTINATION_02/2022/11/IMG_8001.jpg")
-                .expect("Could not create files");
-            File::create("mockDESTINATION_02/2022/11/IMG_8002.jpg")
-                .expect("Could not create files");
-            File::create("mockDESTINATION_02/2022/12/IMG_8003.jpg")
-                .expect("Could not create files");
-            File::create("mockDESTINATION_02/2022/12/IMG_8004.jpg")
-                .expect("Could not create files");
+            File::create("mockDESTINATION_02/2022/11/IMG_8001.jpg")?;
+            File::create("mockDESTINATION_02/2022/11/IMG_8002.jpg")?;
+            File::create("mockDESTINATION_02/2022/12/IMG_8003.jpg")?;
+            File::create("mockDESTINATION_02/2022/12/IMG_8004.jpg")?;
         }
 
         // Run the `lean()` function
         {
             let mock_source = PathBuf::from("mockSOURCE_02");
-            let mock_source = FileList::build(&mock_source).expect("Failed to build `FileList`s");
+            let mock_source = FileList::build(&mock_source)?;
 
             let mock_destination = PathBuf::from("mockDESTINATION_02");
-            let mock_destination =
-                FileList::build(&mock_destination).expect("Failed to build `FileList`s");
+            let mock_destination = FileList::build(&mock_destination)?;
 
-            lean(&mock_destination, &mock_source).expect("`lean()` function panicked");
+            lean(&mock_destination, &mock_source)?;
         }
 
         // Test that IMG_8002.jpg is no longer present
@@ -243,28 +238,30 @@ mod tests {
 
         // Clean up
         {
-            fs::remove_dir_all("mockSOURCE_02").expect("Failed to remove mock directories");
-            fs::remove_dir_all("mockDESTINATION_02").expect("Failed to remove mock directories");
+            fs::remove_dir_all("mockSOURCE_02")?;
+            fs::remove_dir_all("mockDESTINATION_02")?;
         }
+
+        Ok(())
     }
 
     #[test]
-    fn organize_function_works() {
+    fn organize_function_works() -> Result<(), Box<dyn Error>> {
         // Create the source file and directory structure.
         {
-            fs::create_dir_all("mockSOURCE_03/202211__").expect("Could not create directories");
-            fs::create_dir_all("mockSOURCE_03/202212__").expect("Could not create directories");
+            fs::create_dir_all("mockSOURCE_03/202211__")?;
+            fs::create_dir_all("mockSOURCE_03/202212__")?;
 
-            File::create("mockSOURCE_03/202211__/IMG_8001.JPG").expect("Could not create files");
-            File::create("mockSOURCE_03/202211__/IMG_8002.JPG").expect("Could not create files");
-            File::create("mockSOURCE_03/202212__/IMG_8003.JPG").expect("Could not create files");
-            File::create("mockSOURCE_03/202212__/IMG_8004.JPG").expect("Could not create files");
+            File::create("mockSOURCE_03/202211__/IMG_8001.JPG")?;
+            File::create("mockSOURCE_03/202211__/IMG_8002.JPG")?;
+            File::create("mockSOURCE_03/202212__/IMG_8003.JPG")?;
+            File::create("mockSOURCE_03/202212__/IMG_8004.JPG")?;
         }
 
         // Run the `organize()` function
         {
             let mock_source = PathBuf::from("mockSOURCE_03");
-            let mock_source = FileList::build(&mock_source).expect("Failed to build FileList");
+            let mock_source = FileList::build(&mock_source)?;
 
             organize(&mock_source, false, "mockSOURCE_03", "mockDESTINATION_03")
                 .expect("`organize()` function panicked");
@@ -288,8 +285,10 @@ mod tests {
 
         // Clean up
         {
-            fs::remove_dir_all("mockSOURCE_03").expect("Failed to remove mock directories");
-            fs::remove_dir_all("mockDESTINATION_03").expect("Failed to remove mock directories");
+            fs::remove_dir_all("mockSOURCE_03")?;
+            fs::remove_dir_all("mockDESTINATION_03")?;
         }
+
+        Ok(())
     }
 }
