@@ -1,6 +1,6 @@
 # CLI Photo organizer
 [![Commits since last release](https://img.shields.io/github/commits-since/nico-castell/photo_organizer/latest?label=Commits%20since%20last%20release&color=informational&logo=Git&logoColor=white&style=flat-square)](https://github.com/nico-castell/photo_organizer/commits)
-[![Release](https://img.shields.io/github/v/release/nico-castell/photo_organizer?label=Release&color=informational&logo=GitHub&logoColor=white&style=flat-square)](https://github.com/nico-castell/photo_organizer/releases)
+[![Crates version](https://img.shields.io/crates/v/iphone_organizer?color=informational&label=Crate%20version&logo=Rust&logoColor=white&style=flat-square)](https://crates.io/crates/iphone_organizer/versions)
 [![License](https://img.shields.io/github/license/nico-castell/photo_organizer?label=License&color=informational&logo=Open%20Source%20Initiative&logoColor=white&style=flat-square)](LICENSE)
 [![Tests](https://img.shields.io/github/workflow/status/nico-castell/photo_organizer/tests?label=tests&logo=GitHub%20Actions&logoColor=white&style=flat-square)](https://github.com/nico-castell/photo_organizer/actions/workflows/rust-tests.yml)
 
