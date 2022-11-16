@@ -48,7 +48,7 @@ impl Config {
                 "-o" | "--override" => override_present = true,
                 "-s" | "--skip" => override_present = false,
                 "-l" | "--lean" => lean = true,
-                other => return Err(format!("Unknown option: {}", other).into()),
+                other => return Err(format!("Unknown option: `{}`", other).into()),
             }
         }
 
@@ -71,18 +71,20 @@ impl Config {
     pub fn print_config() {
         eprint!(
             "\
-\x1B[01m{} SOURCE DESTINATION [OPTIONS]\x1B[00m
-Version: {}\n
+Usage:
+      \x1B[01m{} SOURCE DESTINATION [OPTIONS]\x1B[00m\n
 Options:
    -s | --skip     ) Skips all files that are already present at DESTINATION.
                      This is the default.\n
    -o | --override ) Replaces files already present at DESTINATION with the
                      version from SOURCE.\n
    -l | --lean     ) Remove files present at DESTINATION but not SOURCE.\n
-   -h | --help     ) Prints this help information.
+   -h | --help     ) Prints this help information.\n
+Version: {}, {} License
 ",
-            env!("CARGO_PKG_NAME"),
-            env!("CARGO_PKG_VERSION")
+        env!("CARGO_PKG_NAME"),
+        env!("CARGO_PKG_VERSION"),
+        env!("CARGO_PKG_LICENSE")
         );
     }
 }
