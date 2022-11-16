@@ -141,17 +141,37 @@ pub fn lean(destination: &FileList, source: &FileList) -> Result<(), Box<dyn Err
     let source_list = source.list.borrow();
     let destination_list = destination.list.borrow();
 
-    let source_list: Vec<&PathBuf> = source_list.iter().filter(|file| !file.is_dir()).collect();
+    let source_list: Vec<&PathBuf> = source_list
+        .iter()
+        .filter(|file| {
+            if file.is_dir() {
+                return false;
+            }
+            if file.extension().unwrap().to_str().unwrap().to_uppercase() == "AAE" {
+                return false;
+            }
+            true
+        })
+        .collect();
     let destination_list: Vec<&PathBuf> = destination_list
         .iter()
-        .filter(|file| !file.is_dir())
+        .filter(|file| {
+            if file.is_dir() {
+                return false;
+            }
+            if file.extension().unwrap().to_str().unwrap().to_uppercase() == "AAE" {
+                return false;
+            }
+            true
+        })
         .collect();
 
     let mut index = 0;
     let mut offset = 0;
 
     while index < destination_list.len() {
-        let source = source_list[index - offset]
+        let source = source_list.get(index - offset)
+            .unwrap_or(&&PathBuf::from("~`_(][XY#?M"))
             .file_name()
             .expect("The program was run using a path ending in `..`")
             .to_str()
@@ -164,7 +184,7 @@ pub fn lean(destination: &FileList, source: &FileList) -> Result<(), Box<dyn Err
             .expect("The program will have already ended if there's invalid UTF-8")
             .to_uppercase();
 
-        if source != destination && destination_list[index].is_file() {
+        if source != destination {
             fs::remove_file(destination_list[index])?;
             offset += 1;
         }
