@@ -56,8 +56,8 @@ command:
 
 ```
 $ iphone_organizer --help
-iphone_organizer SOURCE DESTINATION [OPTIONS]
-Version: 1.1.0
+Usage:
+      iphone_organizer SOURCE DESTINATION [OPTIONS]
 
 Options:
    -s | --skip     ) Skips all files that are already present at DESTINATION.
@@ -69,6 +69,8 @@ Options:
    -l | --lean     ) Remove files present at DESTINATION but not SOURCE.
 
    -h | --help     ) Prints this help information.
+
+Version: 1.2.2, MIT License
 ```
 
 ## About
