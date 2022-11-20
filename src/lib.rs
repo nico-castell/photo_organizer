@@ -146,7 +146,7 @@ pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
     if config.lean {
         let destination_list = FileList::build(&PathBuf::from(&destination))?;
 
-        file_ops::lean(&destination_list, &source_list)?
+        file_ops::lean(&destination_list, &source_list)?;
     }
 
     Ok(())
