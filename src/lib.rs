@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use std::{error::Error, fmt, path::PathBuf, result};
 
 /// Module for file operations such as copying and removing.
@@ -8,6 +10,7 @@ pub use file_ops::{lean, organize, FileList};
 /// function.
 ///
 /// You can create an instance of this struct using `Config::build()`.
+#[deprecated(since="1.2.4", note="Please use `FileList` directly.")]
 pub struct Config {
     source: String,
     destination: String,
@@ -131,6 +134,7 @@ Version: {}, {} License
 /// # fs::remove_dir_all(&mockDESTINATION);
 /// # fs::remove_dir_all(&mockSOURCE);
 /// ```
+#[deprecated(since="1.2.4", note="Use the `organize` and `lean` functions directly.")]
 pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
     let (source, destination) = (config.source, config.destination);
 
