@@ -1,189 +1,296 @@
-use std::{error::Error, fmt, path::PathBuf, result};
+use std::{cell::RefCell, error::Error, fs, io, path::PathBuf, rc::Rc};
 
-/// Module for file operations such as copying and removing.
-pub mod file_ops;
-pub use file_ops::{lean, organize, FileList};
-
-/// The config for the organization of the iPhone images. Taken as an argument by the [`run`](run)
-/// function.
+/// The list of files for organizing. Taken as an argument by the [`organize()`](organize) and
+/// [`lean()`](lean) functions.
 ///
-/// You can create an instance of this struct using `Config::build()`.
-pub struct Config {
-    source: String,
-    destination: String,
-    override_present: bool,
-    lean: bool,
+/// # Examples
+/// You can create a `FileList` using `FileList::build()`:
+///
+/// ```
+/// # use iphone_organizer::FileList;
+/// # use std::{path::PathBuf, fs};
+/// # let path = PathBuf::from("mockPATH");
+/// # fs::create_dir(&path);
+/// let file_list = match FileList::build(&path) {
+///     Ok(list) => list,
+///     Err(error) => panic!("{error}"),
+/// };
+/// # fs::remove_dir(&path);
+/// ```
+pub struct FileList {
+    list: Rc<RefCell<Vec<PathBuf>>>,
 }
 
-impl Config {
-    /// Creates a `Config` type. **Assumes** the first iteration of `args` is the program name, so
-    /// it's ignored.
-    ///
-    /// Parameter:
-    /// - `args` - An iterator, meant to iterate over the binary's arguments and flags.
+impl FileList {
+    /// Reads the `source` directory and returns a Result which wraps the file list if Ok and an
+    /// error message if Err.
     ///
     /// # Errors
     ///
-    /// The function can fail if `args` does not contain source and destination paths, or if one of
-    /// the flags isn't recognized.
-    pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, Box<dyn Error>> {
-        args.next();
+    /// this constructor can fail if it fails to read the source directory structure.
+    pub fn build(source: &PathBuf) -> Result<FileList, Box<dyn Error>> {
+        fn build_list(list: Rc<RefCell<Vec<PathBuf>>>) -> io::Result<()> {
+            let dir = list
+                .borrow()
+                .get(list.borrow().len() - 1)
+                .expect("The program will error during the config phase if there are no directories in the list.")
+                .to_path_buf();
+            if dir.is_dir() {
+                for entry in fs::read_dir(dir)? {
+                    let entry = entry?;
+                    let path = entry.path();
 
-        let source = match args.next() {
-            Some(file) => file,
-            None => return Err("Didn't get a source directory".into()),
-        };
+                    unsafe {
+                        let list = list.as_ptr();
+                        (*list).push(PathBuf::from(&path));
+                    }
 
-        let destination = match args.next() {
-            Some(file) => file,
-            None => return Err("Didn't get a destination directory".into()),
-        };
-
-        let mut override_present = false;
-        let mut lean = false;
-
-        for arg in args {
-            let arg = arg.as_str();
-            match arg {
-                "-o" | "--override" => override_present = true,
-                "-s" | "--skip" => override_present = false,
-                "-l" | "--lean" => lean = true,
-                other => return Err(format!("Unknown option: `{}`", other).into()),
+                    if path.is_dir() {
+                        build_list(Rc::clone(&list))?;
+                    }
+                }
             }
+
+            Ok(())
         }
 
-        Ok(Config {
-            source,
-            destination,
-            override_present,
-            lean,
-        })
-    }
+        {
+            let list = Rc::new(RefCell::new(vec![PathBuf::from(source)]));
 
-    /// Prints the configuration options to stderr.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # use iphone_organizer::*;
-    /// Config::print_config()
-    /// ```
-    pub fn print_config() {
-        eprint!(
-            "\
-Usage:
-      \x1B[01m{} SOURCE DESTINATION [OPTIONS]\x1B[00m\n
-Options:
-   -s | --skip     ) Skips all files that are already present at DESTINATION.
-                     This is the default.\n
-   -o | --override ) Replaces files already present at DESTINATION with the
-                     version from SOURCE.\n
-   -l | --lean     ) Remove files present at DESTINATION but not SOURCE.\n
-   -h | --help     ) Prints this help information.\n
-Version: {}, {} License
-",
-        env!("CARGO_PKG_NAME"),
-        env!("CARGO_PKG_VERSION"),
-        env!("CARGO_PKG_LICENSE")
-        );
+            build_list(Rc::clone(&list))?;
+
+            Ok(FileList { list })
+        }
     }
 }
 
-/// Runs the configured copy and organization of files.
+/// Creates the directory with the organized files.
 ///
-/// Parameter:
-/// - `config` - A [`Config`](Config) that contains the configuration for the function.
+/// Parameters
+/// - `file_list` - A [`FileList`](FileList).
+/// - `override_present` - A [`bool`](bool) that determines whether to skip files that are already
+///   at destination or to override them.
+/// - `source` - A source [`&str`](&str).
+/// - `destination` - A destination [`&str`](&str).
 ///
 /// # Errors
 ///
-/// This function will return an error if:
-/// - The source path does not exist or isn't a directory.
-/// - The files contain invalid UTF-8 names.
-/// - The directory structures of source or destination fail to be read, because of lack of
-///   permissions or otherwise.
-/// - The files cannot be copied, read, or deleted.
-///
-/// # Examples
-///
-/// ```
-/// # use iphone_organizer::*;
-/// # use std::{fs, path::PathBuf};
-/// #
-/// # let mockSOURCE = PathBuf::from("mockSOURCE");
-/// # let mockDESTINATION = PathBuf::from("mockDESTINATION");
-/// #
-/// # fs::create_dir(&mockSOURCE);
-/// #
-/// # let args = vec![
-/// #     String::from("program_name"),
-/// #     String::from("mockSOURCE"),
-/// #     String::from("mockDESTINATION"),
-/// # ];
-/// # let config = match Config::build(args.into_iter()) {
-/// #     Ok(config) => config,
-/// #     Err(error) => panic!("Failed to build `Config`: {}", error),
-/// # };
-/// #
-/// if let Err(error) = run(config) {
-///     panic!("Application error: {error}");
-/// }
-/// #
-/// # fs::remove_dir_all(&mockDESTINATION);
-/// # fs::remove_dir_all(&mockSOURCE);
-/// ```
-pub fn run(config: Config) -> result::Result<(), Box<dyn Error>> {
-    let (source, destination) = (config.source, config.destination);
+/// This function may result in an error in case:
+/// - The files don't contain valid UTF-8 data.
+/// - You don't have permissions to edit the destination.
+pub fn organize(
+    file_list: &FileList,
+    override_present: bool,
+    source: &str,
+    destination: &str,
+) -> Result<(), Box<dyn Error>> {
+    let mut list = RefCell::borrow_mut(&file_list.list);
 
-    let source_path = PathBuf::from(&source);
-    if !source_path.is_dir() {
-        return Err(SourceDirNotExists.into());
-    }
+    for entry in list.iter_mut() {
+        let mut s_entry = entry
+            .to_str()
+            .expect("The program will have already ended if there's invalid UTF-8")
+            .replace(source, destination);
 
-    let source_list = FileList::build(&source_path)?;
+        let s_entry_chars = s_entry.chars().count();
+        let destination_chars = destination.chars().count() + 5;
 
-    file_ops::organize(&source_list, config.override_present, &source, &destination)?;
+        if s_entry_chars > destination_chars {
+            s_entry.insert(destination_chars, '/');
+            _ = s_entry.remove(destination_chars + 3);
+            _ = s_entry.remove(destination_chars + 3);
+        }
 
-    if config.lean {
-        let destination_list = FileList::build(&PathBuf::from(&destination))?;
+        let extension = match entry.extension() {
+            Some(extension) => extension
+                .to_str()
+                .expect("The program will have already ended if there's invalid UTF-8"),
+            None => "",
+        };
+        s_entry = s_entry.replace(extension, &extension.to_lowercase());
 
-        file_ops::lean(&destination_list, &source_list)?;
+        let from = entry.as_path();
+
+        let to = PathBuf::from(&s_entry);
+
+        if extension.is_empty() {
+            fs::create_dir_all(to.as_path())?;
+        } else if !to.exists() || override_present {
+            fs::copy(from, to.as_path())?;
+        }
+
+        if s_entry.contains(".aae") {
+            println!("{}", s_entry);
+        }
     }
 
     Ok(())
 }
 
-#[derive(Debug, Clone)]
-struct SourceDirNotExists;
+/// Removes files present at destination but not source.
+///
+/// Parameters:
+/// - `destination` - A [`FileList`](FileList) of the destination.
+/// - `source` -> [`FileList`](FileList) of the source.
+///
+/// # Errors
+///
+/// This method will result in an error if there are problems deleting the files, such as lack
+/// of permissions to do so.
+pub fn lean(destination: &FileList, source: &FileList) -> Result<(), Box<dyn Error>> {
+    let source_list = source.list.borrow();
+    let destination_list = destination.list.borrow();
 
-impl fmt::Display for SourceDirNotExists {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Source doesn't exist or is not a directory")
+    let source_list: Vec<&PathBuf> = source_list.iter().filter(|file| !file.is_dir()).collect();
+    let destination_list: Vec<&PathBuf> = destination_list
+        .iter()
+        .filter(|file| !file.is_dir())
+        .collect();
+
+    let mut index = 0;
+    let mut offset = 0;
+
+    while index < destination_list.len() {
+        let source = source_list
+            .get(index - offset)
+            .unwrap_or(&&PathBuf::from("~`_(][XY#?M"))
+            .file_name()
+            .expect("The program was run using a path ending in `..`")
+            .to_str()
+            .expect("The program will have already ended if there's invalid UTF-8")
+            .to_uppercase();
+        let destination = destination_list[index]
+            .file_name()
+            .expect("The program was run using a path ending in `..`")
+            .to_str()
+            .expect("The program will have already ended if there's invalid UTF-8")
+            .to_uppercase();
+
+        if source != destination {
+            fs::remove_file(destination_list[index])?;
+            offset += 1;
+        }
+        index += 1;
     }
-}
 
-impl Error for SourceDirNotExists {}
+    Ok(())
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::{
+        fs::{self, File},
+        path::PathBuf,
+    };
+
+    // Using mockSOURCE_XX and mockDESTINATION_XX to avoid trouble during multithreaded testing.
 
     #[test]
-    fn config_builds() {
-        let args = vec![
-            String::from("program_name"),
-            String::from("mockSOURCE_lib"),
-            String::from("mockDESTINATION_lib"),
-            String::from("-l"),
-            String::from("-o"),
-        ];
-        let config = match Config::build(args.into_iter()) {
-            Ok(config) => config,
-            Err(error) => panic!("Failed to build `Config`: {}", error),
-        };
+    fn file_list_builds() {
+        let source = PathBuf::from("mockSOURCE_01");
 
-        assert_eq!(String::from("mockSOURCE_lib"), config.source);
-        assert_eq!(String::from("mockDESTINATION_lib"), config.destination);
-        assert_eq!(true, config.lean);
-        assert_eq!(true, config.override_present);
+        fs::create_dir(&source).expect("File operation create failing.");
+        let _ = FileList::build(&source).expect("Build function shouldn't fail.");
+        fs::remove_dir(&source).expect("File operation remove failing.");
+    }
+
+    #[test]
+    fn lean_function_works() -> Result<(), Box<dyn Error>> {
+        // Create the source file and directory structure.
+        {
+            fs::create_dir_all("mockSOURCE_02/202211__")?;
+            fs::create_dir_all("mockSOURCE_02/202212__")?;
+
+            File::create("mockSOURCE_02/202211__/IMG_8001.JPG")?;
+            // mockSOURCE_02/202211__/IMG_8002.JPG missing
+            File::create("mockSOURCE_02/202212__/IMG_8003.JPG")?;
+            File::create("mockSOURCE_02/202212__/IMG_8004.JPG")?;
+        }
+
+        // Crate the destination file and directory structure.
+        {
+            fs::create_dir_all("mockDESTINATION_02/2022/11")?;
+            fs::create_dir_all("mockDESTINATION_02/2022/12")?;
+
+            File::create("mockDESTINATION_02/2022/11/IMG_8001.jpg")?;
+            File::create("mockDESTINATION_02/2022/11/IMG_8002.jpg")?;
+            File::create("mockDESTINATION_02/2022/12/IMG_8003.jpg")?;
+            File::create("mockDESTINATION_02/2022/12/IMG_8004.jpg")?;
+        }
+
+        // Run the `lean()` function
+        {
+            let mock_source = PathBuf::from("mockSOURCE_02");
+            let mock_source = FileList::build(&mock_source)?;
+
+            let mock_destination = PathBuf::from("mockDESTINATION_02");
+            let mock_destination = FileList::build(&mock_destination)?;
+
+            lean(&mock_destination, &mock_source)?;
+        }
+
+        // Test that IMG_8002.jpg is no longer present
+        {
+            let test_file = PathBuf::from("mockDESTINATION_02/2022/11/IMG_8002.jpg");
+            if test_file.exists() {
+                panic!("The file that should have been deleted at DESTINATION is still present");
+            }
+        }
+
+        // Clean up
+        {
+            fs::remove_dir_all("mockSOURCE_02")?;
+            fs::remove_dir_all("mockDESTINATION_02")?;
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn organize_function_works() -> Result<(), Box<dyn Error>> {
+        // Create the source file and directory structure.
+        {
+            fs::create_dir_all("mockSOURCE_03/202211__")?;
+            fs::create_dir_all("mockSOURCE_03/202212__")?;
+
+            File::create("mockSOURCE_03/202211__/IMG_8001.JPG")?;
+            File::create("mockSOURCE_03/202211__/IMG_8002.JPG")?;
+            File::create("mockSOURCE_03/202212__/IMG_8003.JPG")?;
+            File::create("mockSOURCE_03/202212__/IMG_8004.JPG")?;
+        }
+
+        // Run the `organize()` function
+        {
+            let mock_source = PathBuf::from("mockSOURCE_03");
+            let mock_source = FileList::build(&mock_source)?;
+
+            organize(&mock_source, false, "mockSOURCE_03", "mockDESTINATION_03")
+                .expect("`organize()` function panicked");
+        }
+
+        // Test that all files and directories are properly organized
+        {
+            let file_list = vec![
+                PathBuf::from("mockDESTINATION_03/2022/11/IMG_8001.jpg"),
+                PathBuf::from("mockDESTINATION_03/2022/11/IMG_8002.jpg"),
+                PathBuf::from("mockDESTINATION_03/2022/12/IMG_8003.jpg"),
+                PathBuf::from("mockDESTINATION_03/2022/12/IMG_8004.jpg"),
+            ];
+
+            for file in file_list {
+                if !file.exists() {
+                    panic!("File {} was not copied", file.display());
+                }
+            }
+        }
+
+        // Clean up
+        {
+            fs::remove_dir_all("mockSOURCE_03")?;
+            fs::remove_dir_all("mockDESTINATION_03")?;
+        }
+
+        Ok(())
     }
 }

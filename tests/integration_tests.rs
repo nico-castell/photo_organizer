@@ -4,7 +4,7 @@ use std::{
     path::PathBuf,
 };
 
-use iphone_organizer::{self, Config};
+use iphone_organizer::FileList;
 
 #[test]
 fn run_works() -> Result<(), Box<dyn Error>> {
@@ -22,15 +22,17 @@ fn run_works() -> Result<(), Box<dyn Error>> {
 
     // Run the test function
     {
-        let args = vec![
-            String::from("program_name"),
-            String::from("mockSOURCE_INTEGRATION_01"),
-            String::from("mockDESTINATION_INTEGRATION_01"),
-        ];
+        let source = PathBuf::from("mockSOURCE_INTEGRATION_01");
+        let destination = PathBuf::from("mockDESTINATION_INTEGRATION_01");
 
-        let config = Config::build(args.into_iter())?;
+        let source_list = FileList::build(&source)?;
 
-        iphone_organizer::run(config)?;
+        iphone_organizer::organize(
+            &source_list,
+            false,
+            &source.to_str().unwrap(),
+            &destination.to_str().unwrap(),
+        )?;
     }
 
     // Test the destination directory
