@@ -70,7 +70,7 @@ Options:
 
    -h | --help     ) Prints this help information.
 
-Version: 1.2.2, MIT License
+Version: 1.3.0, MIT License
 ```
 
 ## About
