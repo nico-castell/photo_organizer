@@ -2,7 +2,8 @@
 
 use std::{env, process};
 
-use iphone_organizer::Config;
+mod runner;
+use runner::Config;
 
 fn main() {
     // Handle `--help` and `-h`
@@ -22,7 +23,7 @@ fn main() {
     };
 
     // Run the program
-    if let Err(error) = iphone_organizer::run(config) {
+    if let Err(error) = runner::run(config) {
         eprintln!("\x1B[01;31mApplication error\x1B[00m: {}", error);
         process::exit(2);
     }
